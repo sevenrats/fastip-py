@@ -3,8 +3,6 @@
 import asyncio
 from asyncio.tasks import FIRST_COMPLETED
 import aiohttp
-import httpx
-import time
 
 providers = [
 	'https://ident.me',
@@ -22,11 +20,13 @@ async def get(url, session):
 			pass
 	return r
 
-async def main(urls): # returns the tuple of sets of tasks (finished,unfished)
+async def main(urls):
 	async with aiohttp.ClientSession() as session:
-		return await asyncio.wait([*[asyncio.create_task(get(url, session)) for url in urls]], return_when=asyncio.FIRST_COMPLETED)
+		return await asyncio.wait(
+			[*[asyncio.create_task(get(url, session)) for url in urls]],
+			return_when=asyncio.FIRST_COMPLETED,
+			timeout = 5)
 
-#for r in asyncio.get_event_loop().run_until_complete(main(providers))[0]:
 for r in asyncio.run(main(providers))[0]:
 	print(r.result().rstrip())
 	break
